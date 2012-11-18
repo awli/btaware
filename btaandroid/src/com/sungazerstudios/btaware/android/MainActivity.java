@@ -18,24 +18,27 @@ public class MainActivity extends Activity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+		this.getIntent().getExtras();
 	}
 
 	public void onResume() {
 		super.onResume();
+		verifyBluetoothOn();
+		// TODO Figure out where I am.
+
+	}
+	
+	private void verifyBluetoothOn() {
 		BluetoothAdapter mBluetoothAdapter = BluetoothAdapter
 				.getDefaultAdapter();
 		if (mBluetoothAdapter == null) {
-			// TODO Device does not support Bluetooth
 			return;
 		}
 		if (!mBluetoothAdapter.isEnabled()) {
 			Intent enableBtIntent = new Intent(
 					BluetoothAdapter.ACTION_REQUEST_ENABLE);
 			startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
-		}
-
-		// TODO Figure out where I am.
-
+		}	
 	}
 
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -59,26 +62,31 @@ public class MainActivity extends Activity {
 
 	public void startComms(View v) {
 		if (commsOn == false) {
-			//TODO Start communications. 
+			verifyBluetoothOn();
+			
+			// TODO Get options to start communications.
+			
 			Intent intent = new Intent(this, CommService.class);
+			intent.addCategory(CommService.START_COMMS_SERVICE);
+			intent.putExtra(CommService.BEACON_MAC_EXTRA, "00:06:66:49:58:C7");
 			this.startService(intent);
-			Toast.makeText(getApplicationContext(), "Communications started.",
-					Toast.LENGTH_SHORT).show();
+
 			commsOn = true;
 			TextView commsOnDisplay = (TextView) findViewById(R.id.commsOnDisplay);
 			commsOnDisplay.setText("Communications on.");
-		}
-		else {
-			Toast.makeText(getApplicationContext(), "Communications already started!",
-					Toast.LENGTH_SHORT).show();
+		} else {
+			Toast.makeText(getApplicationContext(),
+					"Communications already started!", Toast.LENGTH_SHORT)
+					.show();
 			commsOn = false;
 		}
 	}
 
 	public void stopComms(View v) {
-		Toast.makeText(getApplicationContext(), "Communications stopped.",
-				Toast.LENGTH_SHORT).show();
+		Intent intent = new Intent(this, CommService.class);
+		stopService(intent);
 		TextView commsOnDisplay = (TextView) findViewById(R.id.commsOnDisplay);
 		commsOnDisplay.setText("Communications off.");
 	}
+	
 }

@@ -34,4 +34,12 @@
         android:text="@string/hello_world"
         tools:context=".MainActivity" />
 
+    <CheckBox
+        android:id="@+id/alertWhenOOR"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/commsOnDisplay"
+        android:layout_centerHorizontal="true"
+        android:text="CheckBox" />
+
 </RelativeLayout>

@@ -6,7 +6,10 @@ import java.util.UUID;
 import android.app.IntentService;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -15,7 +18,8 @@ public class CommService extends IntentService {
 	public static String START_COMMS_SERVICE = "com.sungazerstudios.btaware.android.scc";
 	public static String BEACON_NAME_EXTRA = "beaconnameextra";
 	public static String BEACON_MAC_EXTRA = "beaconmacextra";
-	public static UUID MY_UUID = UUID.fromString("3b04a01b-cc4f-4d7d-9367-9a0e034d047d");
+	public static UUID MY_UUID = UUID
+			.fromString("3b04a01b-cc4f-4d7d-9367-9a0e034d047d");
 
 	boolean inRange;
 
@@ -30,15 +34,27 @@ public class CommService extends IntentService {
 					Toast.LENGTH_SHORT).show();
 		}
 
-		// String beaconName =
-		// intent.getStringExtra(CommService.BEACON_NAME_EXTRA); //name of the
-		// beacon
-		String beaconMAC = intent.getStringExtra(CommService.BEACON_MAC_EXTRA); // name
-																				// of
-																				// the
-																				// MAC
+		String beaconMAC = intent.getStringExtra(CommService.BEACON_MAC_EXTRA);
 
 		BluetoothAdapter mBA = BluetoothAdapter.getDefaultAdapter();
+		
+		// Create a BroadcastReceiver for ACTION_FOUND
+		final BroadcastReceiver mReceiver = new BroadcastReceiver() {
+		    public void onReceive(Context context, Intent intent) {
+		        String action = intent.getAction();
+		        // When discovery finds a device
+		        if (BluetoothDevice.ACTION_FOUND.equals(action)) {
+		            // Get the BluetoothDevice object from the Intent
+		            BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+		            // Add the name and address to an array adapter to show in a ListView
+		            //mArrayAdapter.add(device.getName() + "\n" + device.getAddress());
+		        }
+		    }
+		};
+		// Register the BroadcastReceiver
+		IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
+		registerReceiver(mReceiver, filter); // Don't forget to unregister during onDestroy
+		
 		while (mBA.isEnabled()) {
 			Set<BluetoothDevice> pairedDevices = mBA.getBondedDevices();
 			// If there are paired devices
@@ -53,6 +69,11 @@ public class CommService extends IntentService {
 				}
 			}
 			customActions(intent, targetInRange);
+			
+			
+			
+			
+			
 		}
 		Log.d(TAG, "The Bluetooth Adapter is disabled, stopping service...");
 		this.stopSelf();
